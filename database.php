@@ -3,7 +3,7 @@
         private $db_host="localhost";
         private $db_user="root";
         private $db_password="";
-        private $db_name="crudoop";
+        private $db_name="crudoop1";
 
         private $mysqli="";
         private $result=array();
@@ -30,20 +30,22 @@
         public function insertData($table,$params=array()){
             if($this->tableExists($table)){
                 //print_r($params);
-                echo $table;
-                $tableKeys=implode(',',array_keys($params));
-                $tableValues=implode(',',$params);
+                //echo $table;
+                $table_Keys=implode(', ',array_keys($params));
+                $table_Values=implode("', '",$params);
 
-                $sql="INSERT INTO $table ('$tableKeys') VALUES ('$tableValues')";
+                $sql="INSERT INTO $table ($table_Keys) VALUES ('$table_Values')";
 
                 if($this->mysqli->query($sql)){
                     array_push($this->result,$this->mysqli->insert_id);
-                    return true;
+                    echo "yeah";
+                   // return true;
                 }else{
                     array_push($this->result,$this->mysqli->error);
                     echo"not insert";
                     //return true;
                 }
+               
             }else{
                 echo"table not exists";
                 //return false;
@@ -58,18 +60,24 @@
 
         //does table exists or not
         private function tableExists($table){
-            $sql="SHOW TABLES FROM $this->db_name LIKE $table";
+            $sql="SHOW TABLES FROM $this->db_name LIKE '$table'";
             $tableInsideDB=$this->mysqli->query($sql);
             if($tableInsideDB){
-                if($tableInsideDB->num_rows == 1){
-                    //return true;
-                    echo("get the row");
+                if($tableInsideDB->num_rows > 0){
+                    return true;
+                    // echo("get the row");
                 }else{
                     array_push($this->result,$table." table name does not exites!");
                     //return false;
                     echo("table name does not exites");
                 }
             }    
+        }
+
+        public function getError(){
+            $val=$this->result;
+            $this->result=array();
+            return $val;
         }
         //close connection
         public function __distruct(){
