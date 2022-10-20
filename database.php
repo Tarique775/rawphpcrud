@@ -1,9 +1,9 @@
 <?php
-    class Database{
+     class Database{
         private $db_host="localhost";
         private $db_user="root";
         private $db_password="";
-        private $db_name="crudoop1";
+        private $db_name="crudoop";
 
         private $mysqli="";
         private $result=array();
@@ -18,7 +18,7 @@
                     array_push($this->result,$this->mysqli->connect_error);
                     return false;
                 }
-                echo"database connected";
+                echo"database connected<br/>";
             }else{
                 return true;
 
@@ -28,9 +28,11 @@
 
         //INSERT DATA INTO DATABASE
         public function insertData($table,$params=array()){
+            //table exists or not checking
             if($this->tableExists($table)){
                 //print_r($params);
                 //echo $table;
+                //CONVERT AN ARRAY TO STRING
                 $table_Keys=implode(', ',array_keys($params));
                 $table_Values=implode("', '",$params);
 
@@ -38,29 +40,73 @@
 
                 if($this->mysqli->query($sql)){
                     array_push($this->result,$this->mysqli->insert_id);
-                    echo "yeah";
-                   // return true;
+                    //echo "congratulation you done it";
+                    return true;
                 }else{
                     array_push($this->result,$this->mysqli->error);
-                    echo"not insert";
-                    //return true;
+                    //echo"not insert";
+                    return true;
                 }
                
             }else{
-                echo"table not exists";
-                //return false;
+                //echo"table not exists";
+                return false;
             }
         }
 
-        // //UPDATE DATA INTO DATABASE
-        // public function updateData(){}
+        //UPDATE DATA INTO DATABASE
+        public function updateData($table,$params=array(),$where){
+            //table exists or not checking
+            if($this->tableExists($table)){
+                $key_values=array();
+                foreach($params as $key => $value){
+                    array_push($key_values,"$key='$value'");
+                }
+                print_r($key_values);
+                echo "<br/>";
+                // //CONVERT AN ARRAY TO STRING
+                $implodeData=implode(", ",$key_values);
+                
+                // $table_Keys=implode(", ",array_keys($params));
+                // $table_Values=implode(", ",$params);
 
-        //   //DELETE DATA INTO DATABASE
-        // public function insertData(){}
+                echo $sql="UPDATE $table SET $implodeData where $where";
+                echo"<br/>";
+
+                if($this->mysqli->query($sql)){
+                    array_push($this->result,$this->mysqli->affected_rows);
+                    return true;
+                }else{
+                    array_push($this->result,$this->mysqli->error);
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }
+
+        //DELETE DATA INTO DATABASE
+        public function deleteData($table,$where){
+            //table exists or not checking
+            if($this->tableExists($table)){
+                echo $sql="DELETE FROM $table where $where";
+
+                if($this->mysqli->query($sql)){
+                    array_push($this->result,$this->mysqli->affected_rows);
+                    return true;
+                }else{
+                    array_push($this->result,$this->mysqli->error);
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }
 
         //does table exists or not
         private function tableExists($table){
-            $sql="SHOW TABLES FROM $this->db_name LIKE '$table'";
+            echo $sql="SHOW TABLES FROM $this->db_name LIKE '$table'";
+            echo"<br/>";
             $tableInsideDB=$this->mysqli->query($sql);
             if($tableInsideDB){
                 if($tableInsideDB->num_rows > 0){
@@ -68,13 +114,13 @@
                     // echo("get the row");
                 }else{
                     array_push($this->result,$table." table name does not exites!");
-                    //return false;
-                    echo("table name does not exites");
+                    return false;
+                    //echo("table name does not exites");
                 }
             }    
         }
-
-        public function getError(){
+        //ALL THE RESULT SHOWCASE
+        public function getResult(){
             $val=$this->result;
             $this->result=array();
             return $val;
